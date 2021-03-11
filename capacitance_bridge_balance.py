@@ -29,6 +29,9 @@ def main():
         rm.ResourceManager()
         func_gen = rm.open_resource(func_gen_loc)
         lock_in = rm.open_resource(lock_in_loc)
+   tolerance = 1 # dummy tolerance
+   
+   
    
 if __name__ == "__main__":
 	main()
