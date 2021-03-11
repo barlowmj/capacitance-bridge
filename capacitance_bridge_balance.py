@@ -1,37 +1,34 @@
 ## Auto-balance the capacitance bridge
 
 from serial.tools.list_ports import comports
-from
 from time import sleep
 import sys
-from AD9854 import AD9854
-from AD5764_dual import AD5764
-from AD5764-AD7734 import AD5764_AD7734
+import pyvisa as pv
+from serial import Serial
 
 def main():
-    if (sys.argc != 3):
-        if (sys.argc != 1):
-            print("Invalid number of command line arguments. Please execute\
-            the following prompts to continue."
+    # uses command-line arguments for locations of devices
+    # if the user hasn't listed 3 objects, it will disregard command line input
+    # and request that the user input the lcoations of the 3 devices
+    if (sys.argc != 4):
         open_ports = comports()
-        print("The following serial ports are available:\n")
+        print("Listing available USB instruments... \nThe following serial ports are available:\n")
         for coms in open_ports:
             print(com.device+"\n")
-        ac_box_location = input("At which serial port is the AC Box located? ")
-        dc_box_location = input("At which serial port is the DC Box located? ")
-    else if (sys.argc == 3)
-        ac_box_location = argv[1]
-        dc_box_location = argv[2]
-    val = input("Please type \"1\" if you are using the dual AD5764 DC Voltage \
-    Box,or \"2\" if you are using the AD5764-AD7734 DC Voltage Box. ")
-    while (val > 2 or val < 1):
-        val = input("Invalid value. Please input \"1\" or \"2\". ")
-    if (val == 1):
-        dc_box = AD5764(dc_box_location)
-    else:
-        dc_box = AD5764_AD7734(dc_box_location)
-    
-    
-    
+        dc_box_loc = input("At which serial port is the DC Box located? ")
+        print("Listing VISA intruments... \nThe following VISA instruments are available:\n")
+        rm = pv.ResourceManager()
+        rm.list_resources()
+        func_gen_loc = input("Which device corresponsds to the function generator? ")
+        lock_in_loc = input("Which device corresponds the the lock-in amplifier? ")
+    else if (sys.argc == 4)
+        dc_box_loc = argv[1]
+        func_gen_loc = argv[2]
+        lock_in_loc = argv[3]
+        dc_box = Serial(dc_box_loc, 115200, timeout=3)
+        rm.ResourceManager()
+        func_gen = rm.open_resource(func_gen_loc)
+        lock_in = rm.open_resource(lock_in_loc)
+   
 if __name__ == "__main__":
 	main()
