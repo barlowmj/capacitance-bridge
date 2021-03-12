@@ -29,31 +29,41 @@ def main():
     dc_box = Serial(dc_box_loc, 115200, timeout=3)
     func_gen = rm.open_resource(func_gen_loc)
     lock_in = rm.open_resource(lock_in_loc)
-    tolerance = 1e-6 # lock-in sensitivity for <2MHz = 1e-6
-    Cs = 1e-12 # known capacitance
-    dc_vals = arange(0, 10, 50)
+    
+    tolerance = 1e-6 # what accuracy do we want to know the amplitude to?
+    Cs = 1e-12 # known capacitance - hopefully somewhere near target magnitude
+    
+    dc_vals = arange(0, 10, 50) # how many steps? maybe program parameter?
     cx_vals = []
+    
     sour1_amp = 10e-3
-    func_gen.write('SOUR1:APPL:SIN 1e6, {sour1_amp}') # select amplitude that will make convergence happen faster by using Cx = Ve/Vs * Cs
-    for Vdc in dc_vals
+    
+    # initialize function generator output, turn on both simultaneously
+    func_gen.write('SOUR1:FUNC SIN')
+    func_gen.write('SOUR1:FREQ 1e6')
+    func_gen.write(f'SOUR1:VOLT {sour1_amp}')
+    func_gen.write('SOUR1:VOLT:OFF 0')
+    func_gen.write('SOUR2:FUNC SIN')
+    func_gen.write('SOUR2:FREQ 1e6')
+    func_gen.write(f'SOUR2:VOLT {sour1_amp}') # select amplitudes that will make convergence fastest
+    func_gen.write('SOUR2:VOLT:OFF 0')
+    func_gen.write('PHAS:SYNC')
+    func_gen.write('SOUR2:PHAS 180')
+    func_gen.write('OUTP1 1; OUTP2 1')
+    
+    for Vdc in dc_vals:
         setChannel(dc_box, 0, Vdc) # not sure how many channels we need to set for this but this is the command format from aric's code
-        VL0 = 1
-        VL1 = 0
-        amp0 = 10e-3
-        amp1 = 5e-3
-        while (abs(VL1-VL0) > tolerance):
-            func_gen.write(f'SOUR2:APPL:SIN 1e6,{amp0}') # synchronize before channel on? in which case shouldn't use APPL command and should specify the output first then turn on channels after sync command
-            func_gen.write('PHAS:SYNC')
-            func_gen.write('SOUR2:PHAS:ARB 180')
-            time.sleep(1) # based on time const of lock-in
-            VL0 = lock_in.query('X.')
-            # change SOUR2 amplitude and measure lock-in again
-            fun_gen.write(f'SOUR2:FUNC:ARB:PTP {2*amp1}')
-            time.sleep(1) # again, based on time const of lock-in
-            VL1 = lock_in.query('X.')
-            amp = amp1 - VL1*(amp1 - amp0)/(VL1-VL0)
+        amp0 = func_gen.query_ascii_values('SOUR2:VOLT?')[0]
+        VL0 = lock_in.query_ascii_values('X.')[0]
+        amp1 = amp0/2
+        while (abs(amp1-amp0) > tolerance):
+            func_gen.write(f'SOUR2:VOLT {amp1}')
+            time.sleep(1) # optimize
+            VL1 = lock_in.query_ascii_values('X.')[0]
+            new_amp = amp1 - VL1*(amp1-amp0)/(VL1-VL0)
             amp0 = amp1
-            amp1 = amp
+            VL0 = VL1
+            amp1 = new_amp
         Cx = Cs*amp1/sour1_amp
         cx_vals.append(Cx)
        
