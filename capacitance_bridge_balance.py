@@ -6,6 +6,7 @@ import sys
 import pyvisa as pv
 from serial import Serial
 from numpy import arange
+from DC Voltage Box
 
 def main():
     # uses command-line arguments for locations of devices
@@ -36,7 +37,7 @@ def main():
     sour1_amp = 10e-3
     func_gen.write('SOUR1:APPL:SIN 1e6, {sour1_amp}') # select amplitude that will make convergence happen faster by using Cx = Ve/Vs * Cs
     for Vdc in dc_vals
-        # set dc voltage to Vdc
+        
         VL0 = 1
         VL1 = 0
         amp0 = 10e-3
@@ -45,11 +46,11 @@ def main():
             func_gen.write(f'SOUR2:APPL:SIN 1e6,{amp0}') # synchronize before channel on?
             func_gen.write('PHAS:SYNC')
             func_gen.write('SOUR2:PHAS:ARB 180')
-            # time.sleep() based on time const of lock-in
+            time.sleep(1) # based on time const of lock-in
             VL0 = lock_in.query('X.')
-            # change SOUR2 amplitude and measure lock-in
+            # change SOUR2 amplitude and measure lock-in again
             fun_gen.write(f'SOUR2:FUNC:ARB:PTP {2*amp1}')
-            # time.sleep() again
+            time.sleep(1) # again, based on time const of lock-in
             VL1 = lock_in.query('X.')
             amp = amp1 - VL1*(amp1 - amp0)/(VL1-VL0)
             amp0 = amp1
