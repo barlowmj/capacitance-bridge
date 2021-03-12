@@ -6,12 +6,11 @@ import sys
 import pyvisa as pv
 from serial import Serial
 from numpy import arange
-from DC Voltage Box
+from dc_voltage_box_cmd import readChannel, setChannel
 
 def main():
     # uses command-line arguments for locations of devices
-    # if the user hasn't listed 3 objects, it will disregard command line input
-    # and request that the user input the lcoations of the 3 devices
+    # if the user hasn't listed 3 objects, it will disregard command line input and request that the user input the lcoations of the 3 devices
     rm = pv.ResourceManager()
     if (sys.argc != 4):
         open_ports = comports()
@@ -37,13 +36,13 @@ def main():
     sour1_amp = 10e-3
     func_gen.write('SOUR1:APPL:SIN 1e6, {sour1_amp}') # select amplitude that will make convergence happen faster by using Cx = Ve/Vs * Cs
     for Vdc in dc_vals
-        
+        setChannel(dc_box, 0, Vdc) # not sure how many channels we need to set for this but this is the command format from aric's code
         VL0 = 1
         VL1 = 0
         amp0 = 10e-3
         amp1 = 5e-3
         while (abs(VL1-VL0) > tolerance):
-            func_gen.write(f'SOUR2:APPL:SIN 1e6,{amp0}') # synchronize before channel on?
+            func_gen.write(f'SOUR2:APPL:SIN 1e6,{amp0}') # synchronize before channel on? in which case shouldn't use APPL command and should specify the output first then turn on channels after sync command
             func_gen.write('PHAS:SYNC')
             func_gen.write('SOUR2:PHAS:ARB 180')
             time.sleep(1) # based on time const of lock-in
