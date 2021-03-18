@@ -5,7 +5,7 @@ from time import sleep
 import sys
 import pyvisa as pv
 from serial import Serial
-from numpy import arange
+from numpy import linspace, zeros
 from dc_voltage_box_cmd import readChannel, setChannel
 
 def main():
@@ -33,8 +33,10 @@ def main():
     tolerance = 1e-6 # what accuracy do we want to know the amplitude to?
     Cs = 1e-12 # known capacitance - hopefully somewhere near target magnitude
     
-    dc_vals = arange(0, 10, 50) # how many steps? maybe program parameter?
-    cx_vals = []
+    N, a, b = 100, 0 , 10 # have as user input in the future?
+    
+    dc_vals = linspace(a, b, N) # how many steps? maybe program parameter?
+    cx_vals = zeros(1, N)
     
     sour1_amp = 10e-3
     
@@ -51,8 +53,8 @@ def main():
     func_gen.write('SOUR2:PHAS 180')
     func_gen.write('OUTP1 1; OUTP2 1')
     
-    for Vdc in dc_vals:
-        setChannel(dc_box, 0, Vdc) # not sure how many channels we need to set for this but this is the command format from aric's code
+    for i in range(1,N):
+        setChannel(dc_box, 0, dc_vals[i]) # not sure how many channels we need to set for this but this is the command format from aric's code
         amp0 = func_gen.query_ascii_values('SOUR2:VOLT?')[0]
         VL0 = lock_in.query_ascii_values('X.')[0]
         amp1 = amp0/2
@@ -65,7 +67,7 @@ def main():
             VL0 = VL1
             amp1 = new_amp
         Cx = Cs*amp1/sour1_amp
-        cx_vals.append(Cx)
+        cx_vals[i] = Cx
        
 if __name__ == "__main__":
 	main()
