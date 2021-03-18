@@ -6,23 +6,30 @@ import sys
 import pyvisa as pv
 from serial import Serial
 from numpy import linspace, zeros
-from dc_voltage_box_cmd import readChannel, setChannel
+from dc_box_commands import readChannel, setChannel
 
 def main():
     # uses command-line arguments for locations of devices
     # if the user hasn't listed 3 objects, it will disregard command line input and request that the user input the lcoations of the 3 devices
+    # try to automate by recognizing substrings and using find(substr, start, end) - gives lowest index, returns -1 if not found -> if find(substr) != -1 -> use that device
     rm = pv.ResourceManager()
-    if (sys.argc != 4):
+    if (len(sys.argv) != 5):
         open_ports = comports()
-        print("Listing available USB instruments... \nThe following serial ports are available:\n")
-        for coms in open_ports:
-            print(com.device+"\n")
-        dc_box_loc = input("At which serial port is the DC Box located? ")
-        print("Listing VISA intruments... \nThe following VISA instruments are available:\n")
-        rm.list_resources()
-        func_gen_loc = input("Which device corresponsds to the function generator? ")
-        lock_in_loc = input("Which device corresponds the the lock-in amplifier? ")
-    else if (sys.argc == 4)
+        print("The following USB instruments are available:")
+        i = 0
+        for com in open_ports:
+            print(f"[{i}] " + com.device)
+            i += 1
+        dc_box_loc = open_ports[int(input("At which serial port is the DC Box located? "))]
+        print("The following VISA instruments are available:")
+        resources = rm.list_resources()
+        i = 0
+        for res in resources:
+            print(f"[{i}] " + res)
+            i += 1
+        func_gen_loc = resources[int(input("Which device corresponsds to the function generator? "))]
+        lock_in_loc = resources[int(input("Which device corresponds the the lock-in amplifier? "))]
+    else:
         dc_box_loc = argv[1]
         func_gen_loc = argv[2]
         lock_in_loc = argv[3]
@@ -30,7 +37,7 @@ def main():
     func_gen = rm.open_resource(func_gen_loc)
     lock_in = rm.open_resource(lock_in_loc)
     
-    tolerance = 1e-6 # what accuracy do we want to know the amplitude to?
+    tolerance = 1e-4 # precision of the amplitudes of the function generator goes to 4 sigfigs
     Cs = 1e-12 # known capacitance - hopefully somewhere near target magnitude
     
     N, a, b = 100, 0 , 10 # have as user input in the future?
