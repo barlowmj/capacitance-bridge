@@ -71,6 +71,7 @@ def main():
         setChannel(dc_box, 0, dc_vals[i]) # not sure how many channels we need to set for this but this is the command format from aric's code
         amp0 = func_gen.query_ascii_values('SOUR2:VOLT?')[0]
         # time.sleep ? need to wait for value to settle based on time const
+        # time const can range 1 us - 200 us for FASTMODE (need fixed point), ranges from 500 us - 100 ks otherwise but time.sleep() only accurate to 10-13 ms; may need another method? or will exxecution time be longer than time const in this case?
         VL0 = lock_in.query_ascii_values('X.')[0]
         amp1 = amp0/2
         while (abs(amp1-amp0) > tolerance):
