@@ -37,6 +37,11 @@ def main():
     func_gen = rm.open_resource(func_gen_loc)
     lock_in = rm.open_resource(lock_in_loc)
     
+    timer = False
+    if argv[-1] == "--timer":
+        timer = True
+        print("Timer mode ON")
+    
     tolerance = 1e-4 # precision of the amplitudes of the function generator goes to 4 sigfigs
     Cs = 1e-12 # known capacitance - hopefully somewhere near target magnitude
     
@@ -60,12 +65,18 @@ def main():
     func_gen.write('SOUR2:PHAS 180')
     func_gen.write('OUTP1 1; OUTP2 1')
     
-    for i in range(1,N):
+    for i in range(N-1):
+        if timer:
+            meas_time_start = time.time()
         setChannel(dc_box, 0, dc_vals[i]) # not sure how many channels we need to set for this but this is the command format from aric's code
         amp0 = func_gen.query_ascii_values('SOUR2:VOLT?')[0]
+        # time.sleep ? need to wait for value to settle based on time const
         VL0 = lock_in.query_ascii_values('X.')[0]
         amp1 = amp0/2
         while (abs(amp1-amp0) > tolerance):
+            if timer:
+                begin = time.time()
+                
             func_gen.write(f'SOUR2:VOLT {amp1}')
             time.sleep(1) # optimize
             VL1 = lock_in.query_ascii_values('X.')[0]
@@ -73,7 +84,16 @@ def main():
             amp0 = amp1
             VL0 = VL1
             amp1 = new_amp
+            if timer:
+                end = time.time()
+                loop_duration = end - begin
+                print(f"Loop lasted {loop_duration} s")
         Cx = Cs*amp1/sour1_amp
+        if timer:
+            meas_time_end = time.time()
+            meas_time = end - begin
+            print(f"    Measurement {i} required {meas_time} s")
+            meas_num += 1
         cx_vals[i] = Cx
        
 if __name__ == "__main__":
