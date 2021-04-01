@@ -2,7 +2,7 @@ from time import sleep
 import sys
 import pyvisa as pv
 from serial import serial
-from numpy import linspace, zeros
+from numpy import geomspace, zeros
 
 def main():
     # command-line argument - python3 freq_sweep.py [low] [high] [number of points]
@@ -28,28 +28,26 @@ def main():
     
     tolerance = 1e-4 # precision of the amplitudes of the function generator goes to 4 sigfigs
     
-    f_vals = linspace(a, b, N) # how many steps? maybe program parameter?
-    Vs_vals = zeros(1, N)
+    f_vals = geomspace(a, b, N)
+    Vs_vals = zeros(N)
     
-    sour1_amp = 10e-3
+    Vx = 10e-3
     
     # initialize function generator output, turn on both simultaneously
     # choose source 2 to be Vs i.e. variable amplitude, hold Vx constant
     func_gen.write('SOUR1:FUNC SIN')
     func_gen.write(f'SOUR1:FREQ {f_vals[0]}')
-    func_gen.write(f'SOUR1:VOLT {sour1_amp}')
+    func_gen.write(f'SOUR1:VOLT {Vx}')
     func_gen.write('SOUR1:VOLT:OFF 0')
     func_gen.write('SOUR2:FUNC SIN')
     func_gen.write(f'SOUR2:FREQ {f_vals[0]}')
-    func_gen.write(f'SOUR2:VOLT {sour1_amp}') # select amplitudes that will make convergence fastest
+    func_gen.write(f'SOUR2:VOLT {Vx}') # select amplitudes that will make convergence fastest
     func_gen.write('SOUR2:VOLT:OFF 0')
     func_gen.write('PHAS:SYNC')
     func_gen.write('SOUR2:PHAS 180')
     func_gen.write('OUTP1 1; OUTP2 1')
     
-    
-    
-    for i in range(N-1):
+    for i in range(1,N):
         amp0 = func_gen.query_ascii_values('SOUR2:VOLT?')[0]
         # time.sleep ? need to wait for value to settle based on time const
         # time const can range 1 us - 200 us for FASTMODE (need fixed point), ranges from 500 us - 100 ks otherwise but time.sleep() only accurate to 10-13 ms; may need another method? or will exxecution time be longer than time const in this case?
