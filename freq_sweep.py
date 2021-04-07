@@ -9,14 +9,7 @@ def main():
     a = argv[2]
     b = argv[3]
     N = argv[4]
-    
-    open_ports = comports()
-    print("The following USB instruments are available:")
-    i = 0
-    for com in open_ports:
-        print(f"[{i}] " + com.device)
-        i += 1
-    dc_box_loc = open_ports[int(input("At which serial port is the DC Box located? "))]
+    rm = pv.ResourceManager()
     print("The following VISA instruments are available:")
     resources = rm.list_resources()
     i = 0
@@ -25,6 +18,9 @@ def main():
         i += 1
     func_gen_loc = resources[int(input("Which device corresponsds to the function generator? "))]
     lock_in_loc = resources[int(input("Which device corresponds the the lock-in amplifier? "))]
+    
+    fun_gen = rm.open_resource(func_gen_loc)
+    lock_in = rm.open_resource(lock_in_loc)
     
     tolerance = 1e-4 # precision of the amplitudes of the function generator goes to 4 sigfigs
     
@@ -49,8 +45,6 @@ def main():
     
     for i in range(1,N):
         amp0 = func_gen.query_ascii_values('SOUR2:VOLT?')[0]
-        # time.sleep ? need to wait for value to settle based on time const
-        # time const can range 1 us - 200 us for FASTMODE (need fixed point), ranges from 500 us - 100 ks otherwise but time.sleep() only accurate to 10-13 ms; may need another method? or will exxecution time be longer than time const in this case?
         VL0 = lock_in.query_ascii_values('X.')[0]
         amp1 = amp0/2
         while (abs(amp1-amp0) > tolerance):
