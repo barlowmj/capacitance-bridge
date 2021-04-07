@@ -17,8 +17,18 @@ def main():
     func_gen.write('SOUR1:FREQ +1.0E+02')
     func_gen.write('SOUR1:VOLT +0.5')
     func_gen.write('SOUR1:VOLT:OFF 0')
+    print("Writing reference output from SOUR2...")
+    func_gen.write('SOUR2:FUNC SIN')
+    func_gen.write('SOUR2:FREQ +1.0E+04')
+    func_gen.write('SOUR2:VOLT +0.25')
+    func_gen.write('SOUR2:VOLT:OFF 0')
+    command1 = input("Turn on output [y when ready]: ")
+    if (command1 == 'y;):
+        continue
+    else:
+        return
     print("Turning on output...")
-    func_gen.write('OUTP1 ON')
+    func_gen.write('OUTP1 1; OUTP2 1')
     command = input("Input frequency here or select 'exit': ")
     while (command != 'exit'):
         func_gen.write('SOUR1:FREQ' + input)
