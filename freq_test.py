@@ -14,9 +14,10 @@ def main():
     lock_in = rm.open_resource(lock_in_loc)
     print("Loading default excitation...")
     func_gen.write('SOUR1:FUNC SIN')
-    func_gen.write(f'SOUR1:FREQ +1.0E+02')
-    func_gen.write(f'SOUR1:VOLT +0.5')
+    func_gen.write('SOUR1:FREQ +1.0E+02')
+    func_gen.write('SOUR1:VOLT +0.5')
     func_gen.write('SOUR1:VOLT:OFF 0')
+    print("Turning on output...")
     func_gen.write('OUTP1 ON')
     command = input("Input frequency here or select 'exit': ")
     while (command != 'exit'):
