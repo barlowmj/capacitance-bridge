@@ -2,13 +2,10 @@ from time import sleep
 import sys
 import pyvisa as pv
 from serial import serial
-from numpy import geomspace, zeros
+from numpy import zeros, arange
 
 def main():
-    # command-line argument - python3 freq_sweep.py [low] [high] [number of points]
-    a = argv[2]
-    b = argv[3]
-    N = argv[4]
+    # select lock-in, function generator devices from GPIB
     rm = pv.ResourceManager()
     print("The following VISA instruments are available:")
     resources = rm.list_resources()
@@ -19,29 +16,54 @@ def main():
     func_gen_loc = resources[int(input("Which device corresponsds to the function generator? "))]
     lock_in_loc = resources[int(input("Which device corresponds the the lock-in amplifier? "))]
     
+    # open function generator and lock-in resources
     fun_gen = rm.open_resource(func_gen_loc)
     lock_in = rm.open_resource(lock_in_loc)
     
-    tolerance = 1e-4 # precision of the amplitudes of the function generator goes to 4 sigfigs
+    # set frequency values to sweep through - need in notation "{m}E0{n}"
+    # orders of magnitude n
+    order_begin = 3
+    order_end = 6
+    order_vals = range(order_begin, order_end+1)
+    # mantissa values m
+    num_mantissa = 18
+    mant_vals = linspace(1, 10, num_mantissa, endpoint=False)
+    N = num_mantissa * len(order_vals)
     
-    f_vals = geomspace(a, b, N)
-    Vs_vals = zeros(N)
+    f_vals = []
+    for n in order_vals:
+        for m in mant_vals:
+            f_vals.append(f"{str(m)}E0{}")
+            
+    bal_Vs_vals = zeros(N)
+    bal_phs_vals = zeros(N)
+    Vx = '1.0E-02'
     
-    Vx = 10e-3
-    
-    # initialize function generator output, turn on both simultaneously
-    # choose source 2 to be Vs i.e. variable amplitude, hold Vx constant
+    # init source 1 - Vx
     func_gen.write('SOUR1:FUNC SIN')
     func_gen.write(f'SOUR1:FREQ {f_vals[0]}')
-    func_gen.write(f'SOUR1:VOLT {Vx}')
+    func_gen.write('SOUR1:VOLT ' + Vx)
     func_gen.write('SOUR1:VOLT:OFF 0')
+    
+    # init source 2 - Vs
     func_gen.write('SOUR2:FUNC SIN')
     func_gen.write(f'SOUR2:FREQ {f_vals[0]}')
-    func_gen.write(f'SOUR2:VOLT {Vx}') # select amplitudes that will make convergence fastest
+    func_gen.write(f'SOUR2:VOLT ' + Vx)
     func_gen.write('SOUR2:VOLT:OFF 0')
+    
+    # synchronize phase
     func_gen.write('PHAS:SYNC')
+    
+    # set Vs to have phase offset of 180 deg initially
     func_gen.write('SOUR2:PHAS 180')
+    
+    # turn on output
     func_gen.write('OUTP1 1; OUTP2 1')
+    
+    # find phase difference so that signal is only in x component of lock-in
+    XY1 = lock_in.query_ascii_values('XY?')
+    X1, Y1 = XY1[0], XY1[1]
+    
     
     for i in range(1,N):
         amp0 = func_gen.query_ascii_values('SOUR2:VOLT?')[0]
