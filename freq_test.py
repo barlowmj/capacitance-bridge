@@ -22,8 +22,8 @@ def main():
     freq_array = []
     N = 20
     for i in range(3,5):
-        f0 = float(f'1.0E{j}')
-        f1 = float(f'1.0E{j+1}')
+        f0 = float(f'1.0E{i}')
+        f1 = float(f'1.0E{i+1}')
         freq_points = np.linspace(f0,f1,N,endpoint=False)
         for f in freq_points:
             freq_array.append("{:.2E}".format(dec.Decimal(f)))
