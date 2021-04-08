@@ -61,8 +61,8 @@ def main():
     func_gen.write('OUTP1 1; OUTP2 1')
     
     # find phase difference so that signal is only in x component of lock-in
-    XY1 = lock_in.query_ascii_values('XY?')
-    X1, Y1 = XY1[0], XY1[1]
+    Y1 = lock_in.query_ascii_values('X?')
+    
     
     
     for i in range(1,N):
