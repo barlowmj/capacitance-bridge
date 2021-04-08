@@ -5,12 +5,6 @@ import time as time
 def main():
     rm = pv.ResourceManager()
     resources = rm.list_resources()
-    i = 0
-    for res in resources:
-        print(f"[{i}] " + res)
-        i += 1
-    func_gen_loc = resources[int(input("Which device corresponsds to the function generator? "))]
-    lock_in_loc = resources[int(input("Which device corresponds the the lock-in amplifier? "))]
     func_gen_loc = resources[0]
     lock_in_loc = resources[1]
     func_gen = rm.open_resource(func_gen_loc)
@@ -23,32 +17,38 @@ def main():
     func_gen.write('SOUR2:FREQ +1.0E+04')
     func_gen.write('SOUR2:VOLT +0.25')
     func_gen.write('SOUR2:VOLT:OFF 0')
-    command1 = input("Turn on output [y when ready]: ")
-    if (command1 == 'y'):
-        return
-    print("Turning on output...")
     func_gen.write('PHAS:SYNC')
     func_gen.write('OUTP1 1; OUTP2 1')
     freq_array = []
-    for i in range(3,6):
-        for j in range(1,10):
-            freq_array.append(f"{j}.0E0{i}")
-    X = np.zeros(27,float)
-    Y = np.zeros(27,float)
+    N = 20
+    for i in range(3,5):
+        f0 = float(f'1.0E{j}')
+        f1 = float(f'1.0E{j+1}')
+        freq_points = np.linspace(f0,f1,N,endpoint=False)
+        for f in freq_points:
+            freq_array.append("{:.2E}".format(dec.Decimal(f)))
     n = 0
     for freq in freq_array:
+        f = float(freq)
         func_gen.write('SOUR1:FREQ ' + freq)
         func_gen.write('SOUR2:FREQ ' + freq)
+        if f <= 1e6 and f >= 1e5:
+            lock_in.write(f'TC {6}')
+        elif f <= 1e5 and f >= 1e4:
+            lock_in.write(f'TC {9}')
+        elif f <= 1e4 and f >= 1e3:
+            lock_in.write(f'TC {12}')
+        elif f <= 1e3 and f >= 1e2:
+            lock_in.write(f'TC {15}')
+        else:
+            lock_in.write(f'TC {18}')
         time.sleep(10)
-        XY_value = lock_in.query_ascii_values('XY?')
-        X[n] = XY_value[0]
-        Y[n] = XY_value[1]
+        XY = lock_in.query_ascii_values('XY?')
+        print(freq[n],XY[0],XY[1])
         n += 1
-    print(freq_array)
-    print(X)
-    print(Y)
     func_gen.write('OUTP1 0; OUTP2 0')
     return
 
 if __name__ == "__main__":
     main()
+
