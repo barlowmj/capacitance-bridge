@@ -1,6 +1,7 @@
 import pyvisa as pv
 import numpy as np
 import time as time
+import decimal as dec
 
 def main():
     rm = pv.ResourceManager()
