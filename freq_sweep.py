@@ -22,7 +22,7 @@ def main():
     lock_in = rm.open_resource(lock_in_loc)
 
     # set decimal precision to 3
-    getcontext().prec = 3
+    getcontext().prec = 4
     
     # set frequency values to sweep through - need in notation "{m}E0{n}"
     print("Generating frequency values...")
@@ -90,7 +90,7 @@ def main():
         sleep(7*tc)
         Y_2 = Decimal(lock_in.query_ascii_values('Y?')[0])
         print(f"Y2 = {Y_2}")
-        while (abs(phi_1 - phi_2) > Decimal(1e-2)):
+        while (abs(phi_1 - phi_2) > Decimal(1e-1)):
             phi_m = (phi_1 + phi_2)/2
             func_gen.write(f'SOUR2:PHAS {phi_m}')
             sleep(7*tc)
@@ -114,7 +114,7 @@ def main():
         sleep(7*tc)
         X_2 = Decimal(lock_in.query_ascii_values('X?')[0])
         print(f"X2 = {X_2}")
-        while (abs(a_1-a_2) > Decimal(1e-2)):
+        while (abs(a_1-a_2) > Decimal(1e-3)):
             a_m = (a_1 + a_2)/2
             func_gen.write(f'SOUR2:VOLT {a_m}')
             sleep(7*tc)
@@ -174,7 +174,7 @@ def main():
     sleep(7*tc)
     Y_2 = Decimal(lock_in.query_ascii_values('Y?')[0])
     print(f"Y2 = {Y_2}")
-    while (abs(phi_1 - phi_2) > Decimal(1e-2)):
+    while (abs(phi_1 - phi_2) > Decimal(1e-1)):
         phi_m = (phi_1 + phi_2)/2
         func_gen.write(f'SOUR2:PHAS {phi_m}')
         sleep(7*tc)
@@ -199,7 +199,7 @@ def main():
     sleep(7*tc)
     X_2 = Decimal(lock_in.query_ascii_values('X?')[0])
     print(f"X2 = {X_2}")
-    while (abs(a_1-a_2) > Decimal(1e-2)):
+    while (abs(a_1-a_2) > Decimal(1e-3)):
         a_m = (a_1 + a_2)/2
         func_gen.write(f'SOUR2:VOLT {a_m}')
         sleep(7*tc)
@@ -213,7 +213,7 @@ def main():
 
     # turn off output
     print("Turning off output...")
-    func_gen.write('OUPT1 0; OUTP2 0')
+    func_gen.write('OUTP1 0; OUTP2 0')
 
     # put data into big array then write to txt file
     print("Writing data to csv...")
