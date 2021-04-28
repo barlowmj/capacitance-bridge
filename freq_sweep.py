@@ -42,6 +42,30 @@ def main():
     bal_phs_vals = zeros(M)
     Vs = Decimal(0.01)
 
+    '''
+    f = float(freq_vals[i+1])
+    if f <= 1e6 and f >= 1e5:
+        lock_in.write('FASTMODE 1')
+        lock_in.write('TC 6')
+        tc = 100e-6
+    elif f < 1e5 and f >= 1e4:
+        lock_in.write('FASTMODE 0')
+        lock_in.write('TC 9')
+        tc = 1e-3
+    elif f < 1e4 and f >= 1e3:
+        lock_in.write('FASTMODE 0')
+        lock_in.write('TC 12')
+        tc = 10e-3
+    elif f < 1e3 and f >= 1e2:
+        lock_in.write('FASTMODE 0')
+        lock_in.write('TC 15')
+        tc = 100e-3
+    else:
+        lock_in.write('FASTMODE 0')
+        lock_in.write('TC 18')
+        tc = 1
+    '''
+
     # init source 1 - Vs
     print("Initializing Source 1...")
     func_gen.write('SOUR1:FUNC SIN')
@@ -65,8 +89,8 @@ def main():
     # set initial time constant
     print("Initializing TC...")
     lock_in.write('FASTMODE 0')
-    lock_in.write('TC 15')
-    tc = 100e-3
+    lock_in.write('TC 18')
+    tc = 1
 
     # set sensitivity
     print("Setting sensitivity...")
@@ -131,27 +155,6 @@ def main():
 
         # set new time constant
         print("Setting new time constant...")
-        f = float(freq_vals[i+1])
-        if f <= 1e6 and f >= 1e5:
-            lock_in.write('FASTMODE 1')
-            lock_in.write('TC 6')
-            tc = 100e-6
-        elif f < 1e5 and f >= 1e4:
-            lock_in.write('FASTMODE 0')
-            lock_in.write('TC 9')
-            tc = 1e-3
-        elif f < 1e4 and f >= 1e3:
-            lock_in.write('FASTMODE 0')
-            lock_in.write('TC 12')
-            tc = 10e-3
-        elif f < 1e3 and f >= 1e2:
-            lock_in.write('FASTMODE 0')
-            lock_in.write('TC 15')
-            tc = 100e-3
-        else:
-            lock_in.write('FASTMODE 0')
-            lock_in.write('TC 18')
-            tc = 1
         print(f"TC = {tc}")
 
         # increase frequency
