@@ -10,7 +10,7 @@ def main():
         if sys.argv[1] == "--debug":
             debug = True
             print("Debugging Mode ON")
-    
+
     # select lock-in, function generator devices from GPIB
     rm = pv.ResourceManager()
     print("The following VISA instruments are available:")
@@ -53,67 +53,68 @@ def main():
     tc_vals = []
     tc_n_vals = []
     for f in freq_vals:
+        f = float(f)
         if debug:
             tc_vals.append(1)
             tc_n_vals.append(18)
         elif f >= 1e6:
-            tc_vals.append(1e-6)
-            tc_n_vals.append(0)
-        elif f < 1e6 and f >= 500e3:
-            tc_vals.append(2e-6)
-            tc_n_vals.append(1)
-        elif f < 500e3 and f >= 200e3:
-            tc_vals.append(5e-6)
-            tc_v_vals.append(2)
-        elif f < 200e3 and f >= 100e3:
-            tc_vals.append(10e-6)
+            tc_vals.append(1e-5)
             tc_n_vals.append(3)
-        elif f < 100e3 and f >= 50e3:
-            tc_vals.append(20e-6)
+        elif f < 1e6 and f >= 500e3:
+            tc_vals.append(2e-5)
             tc_n_vals.append(4)
-        elif f < 50e3 and f >= 20e3:
-            tc_vals.append(50e-6)
+        elif f < 500e3 and f >= 200e3:
+            tc_vals.append(5e-5)
             tc_n_vals.append(5)
-        elif f < 20e3 and f >= 10e3:
-            tc_vals.append(100e-6)
+        elif f < 200e3 and f >= 100e3:
+            tc_vals.append(10e-5)
             tc_n_vals.append(6)
-        elif f < 10e3 and f >= 5e3:
-            tc_vals.append(200e-6)
+        elif f < 100e3 and f >= 50e3:
+            tc_vals.append(20e-5)
             tc_n_vals.append(7)
-        elif f < 5e3 and f >= 2e3:
-            tc_vals.append(500e-6)
+        elif f < 50e3 and f >= 20e3:
+            tc_vals.append(50e-5)
             tc_n_vals.append(8)
-        elif f < 2e3 and f >= 1e3:
-            tc_vals.append(1e-3)
+        elif f < 20e3 and f >= 10e3:
+            tc_vals.append(100e-5)
             tc_n_vals.append(9)
-        elif f < 1e3 and f >= 500:
-            tc_vals.append(2e-3)
+        elif f < 10e3 and f >= 5e3:
+            tc_vals.append(200e-5)
             tc_n_vals.append(10)
-        elif f < 500 and f >= 200:
-            tc_vals.append(5e-3)
+        elif f < 5e3 and f >= 2e3:
+            tc_vals.append(500e-5)
             tc_n_vals.append(11)
-        elif f < 200 and f >= 100:
-            tc_vals.append(10e-3)
+        elif f < 2e3 and f >= 1e3:
+            tc_vals.append(1e-2)
             tc_n_vals.append(12)
-        elif f < 100 and f >= 50:
-            tc_vals.append(20e-3)
+        elif f < 1e3 and f >= 500:
+            tc_vals.append(2e-2)
             tc_n_vals.append(13)
-        elif f < 50 and f >= 20:
-            tc_vals.append(50e-3)
+        elif f < 500 and f >= 200:
+            tc_vals.append(5e-2)
             tc_n_vals.append(14)
-        elif f < 20 and f >= 10:
-            tc_vals.append(100e-3)
+        elif f < 200 and f >= 100:
+            tc_vals.append(10e-2)
             tc_n_vals.append(15)
-        elif f < 10 and f >= 5:
-            tc_vals.append(200e-3)
+        elif f < 100 and f >= 50:
+            tc_vals.append(20e-2)
             tc_n_vals.append(16)
-        elif f < 5 and f >= 2:
-            tc_vals.append(500e-3)
+        elif f < 50 and f >= 20:
+            tc_vals.append(50e-2)
             tc_n_vals.append(17)
+        elif f < 20 and f >= 10:
+            tc_vals.append(100e-2)
+            tc_n_vals.append(18)
+        elif f < 10 and f >= 5:
+            tc_vals.append(200e-2)
+            tc_n_vals.append(19)
+        elif f < 5 and f >= 2:
+            tc_vals.append(500e-2)
+            tc_n_vals.append(20)
         else:
             tc_vals.append(1)
             tc_n_vals.append(18)
-            
+
 
     # init source 1 - Vs
     print("Initializing Source 1...")
@@ -143,7 +144,7 @@ def main():
 
     # set sensitivity
     print("Setting sensitivity...")
-    lock_in.write('SEN 22')
+    lock_in.write('SEN 24')
 
     # turn on output
     print("Turning on function generator output...")
@@ -154,19 +155,19 @@ def main():
     for i in range(M):
         # find phase difference so that signal is only in X component of lock-in
         print("Finding phase...")
-        phi_1 = Decimal(90)
-        sleep(10*tc)
+        phi_1 = Decimal(160)
+        sleep(3)
         Y_1 = Decimal(lock_in.query_ascii_values('Y?')[0])
         print(f"Y1 = {Y_1}")
-        phi_2 = Decimal(270)
+        phi_2 = Decimal(200)
         func_gen.write(f'SOUR2:PHAS {phi_2}')
-        sleep(10*tc)
+        sleep(3)
         Y_2 = Decimal(lock_in.query_ascii_values('Y?')[0])
         print(f"Y2 = {Y_2}")
         while (abs(phi_1 - phi_2) > Decimal(1e-1)):
             phi_m = (phi_1 + phi_2)/2
             func_gen.write(f'SOUR2:PHAS {phi_m}')
-            sleep(10*tc)
+            sleep(3)
             Y_m = Decimal(lock_in.query_ascii_values('Y?')[0])
             print(f"Ym = {Y_m}")
             if (sign(Y_m) == sign(Y_2)):
@@ -179,18 +180,18 @@ def main():
         # find amplitude to null lock-in reading
         print("Finding amplitude...")
         a_1 = Vs/10
-        sleep(10*tc)
+        sleep(1)
         X_1 = Decimal(lock_in.query_ascii_values('X?')[0])
         print(f"X1 = {X_1}")
         a_2 = Vs*10
         func_gen.write(f'SOUR2:VOLT {a_2}')
-        sleep(10*tc)
+        sleep(1)
         X_2 = Decimal(lock_in.query_ascii_values('X?')[0])
         print(f"X2 = {X_2}")
         while (abs(a_1-a_2) > Decimal(1e-3)):
             a_m = (a_1 + a_2)/2
             func_gen.write(f'SOUR2:VOLT {a_m}')
-            sleep(10*tc)
+            sleep(1)
             X_m = Decimal(lock_in.query_ascii_values('X?')[0])
             if (sign(X_m) == sign(X_2)):
                 a_2 = a_m
@@ -203,9 +204,9 @@ def main():
             break
 
         # set new time constant
-        if !debug:
+        if debug == False:
             print("Setting new time constant...")
-            lock_in.write(f'TC {tc_n_vals[i+1]')
+            lock_in.write(f'TC {tc_n_vals[i+1]}')
             tc = tc_vals[i+1]
             print(f"TC = {tc}")
 
