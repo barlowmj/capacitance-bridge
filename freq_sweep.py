@@ -15,7 +15,7 @@ def main():
         i += 1
     func_gen_loc = resources[int(input("Which device corresponsds to the function generator? "))]
     lock_in_loc = resources[int(input("Which device corresponds the the lock-in amplifier? "))]
-    
+
     # open function generator and lock-in resources
     print("Opening resources...")
     func_gen = rm.open_resource(func_gen_loc)
@@ -23,7 +23,7 @@ def main():
 
     # set decimal precision to 3
     getcontext().prec = 4
-    
+
     # set frequency values to sweep through - need in notation "{m}E0{n}"
     print("Generating frequency values...")
     freq_vals = []
@@ -36,12 +36,12 @@ def main():
         freq_points = linspace(f0,f1,N,endpoint=False)
         for f in freq_points:
             freq_vals.append("{:.2E}".format(Decimal(f)))
-    
+
     M = N*(b-a)
     bal_Vx_vals = zeros(M)
     bal_phs_vals = zeros(M)
     Vs = Decimal(0.01)
-    
+
     # init source 1 - Vs
     print("Initializing Source 1...")
     func_gen.write('SOUR1:FUNC SIN')
@@ -49,7 +49,7 @@ def main():
     func_gen.write(f'SOUR1:VOLT {Vs}')
     func_gen.write('SOUR1:VOLT:OFF 0')
     func_gen.write('SOUR1:PHAS 0')
-    
+
     # init source 2 - Vx
     print("Initializing Source 2...")
     func_gen.write('SOUR2:FUNC SIN')
@@ -57,11 +57,11 @@ def main():
     func_gen.write(f'SOUR2:VOLT {Vs}')
     func_gen.write('SOUR2:VOLT:OFF 0')
     func_gen.write('SOUR2:PHAS 90')
-    
+
     # synchronize phase
     print("Synchronzing output...")
     func_gen.write('PHAS:SYNC')
-    
+
     # set initial time constant
     print("Initializing TC...")
     lock_in.write('FASTMODE 0')
@@ -75,10 +75,10 @@ def main():
     # turn on output
     print("Turning on function generator output...")
     func_gen.write('OUTP1 1; OUTP2 1')
-    
+
     # loop through frequency values
     print("Beginning frequency value loop...")
-    for i in range(M-1):
+    for i in range(M):
         # find phase difference so that signal is only in X component of lock-in
         print("Finding phase...")
         phi_1 = Decimal(90)
@@ -102,7 +102,7 @@ def main():
                 phi_1 = phi_m
         print(f"Final phi: {phi_m}")
         bal_phs_vals[i] = float(phi_m)
-        
+
         # find amplitude to null lock-in reading
         print("Finding amplitude...")
         a_1 = Vs/10
@@ -125,7 +125,10 @@ def main():
                 a_1 = a_m
         print(f"Final amp: {a_m}")
         bal_Vx_vals[i] = float(a_m)
-        
+
+        if i == (M-1):
+            break
+
         # set new time constant
         print("Setting new time constant...")
         f = float(freq_vals[i+1])
@@ -161,56 +164,6 @@ def main():
         func_gen.write(f'SOUR2:VOLT {Vs}')
         func_gen.write('SOUR2:PHS 90')
 
-    # for last frequency value, repeat then turn off
-
-    # find phase difference so that signal is only in X component of lock-in
-    print("Finding phase...")
-    phi_1 = Decimal(90)
-    sleep(7*tc)
-    Y_1 = Decimal(lock_in.query_ascii_values('Y?')[0])
-    print(f"Y1 = {Y_1}")
-    phi_2 = Decimal(270)
-    func_gen.write(f'SOUR2:PHAS {phi_2}')
-    sleep(7*tc)
-    Y_2 = Decimal(lock_in.query_ascii_values('Y?')[0])
-    print(f"Y2 = {Y_2}")
-    while (abs(phi_1 - phi_2) > Decimal(1e-1)):
-        phi_m = (phi_1 + phi_2)/2
-        func_gen.write(f'SOUR2:PHAS {phi_m}')
-        sleep(7*tc)
-        Y_m = Decimal(lock_in.query_ascii_values('Y?')[0])
-        print(f"Ym = {Y_m}")
-        if (sign(Y_m) == sign(Y_2)):
-            phi_2 = phi_m
-        else:
-            phi_1 = phi_m
-    print(f"Final phi: {phi_m}")
-    bal_phs_vals[i] = float(phi_m)
-
-    # find amplitude to null lock-in reading
-    print("Finding amplitude...")
-    a_1 = Vs/10
-    func_gen.write(f'SOUR2:VOLT {a_1}')
-    sleep(7*tc)
-    X_1 = Decimal(lock_in.query_ascii_values('X?')[0])
-    print(f"X1 = {X_1}")
-    a_2 = Vs*10
-    func_gen.write(f'SOUR2:VOLT {a_2}')
-    sleep(7*tc)
-    X_2 = Decimal(lock_in.query_ascii_values('X?')[0])
-    print(f"X2 = {X_2}")
-    while (abs(a_1-a_2) > Decimal(1e-3)):
-        a_m = (a_1 + a_2)/2
-        func_gen.write(f'SOUR2:VOLT {a_m}')
-        sleep(7*tc)
-        X_m = Decimal(lock_in.query_ascii_values('X?')[0])
-        if (sign(X_m) == sign(X_2)):
-            a_2 = a_m
-        else:
-            a_1 = a_m
-    print(f"Final amp: {a_m}")
-    bal_Vx_vals[i] = float(a_m)
-
     # turn off output
     print("Turning off output...")
     func_gen.write('OUTP1 0; OUTP2 0')
@@ -230,7 +183,6 @@ def main():
     # end program
     print('END')
     return
-       
+
 if __name__ == "__main__":
     main()
-
