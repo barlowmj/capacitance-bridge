@@ -1,4 +1,4 @@
-from matplotlib.pyplot import plot, show, figure, set_xscale
+from matplotlib.pyplot import plot, show, figure, xscale
 import numpy as np
 import pandas as pd
 import csv
@@ -26,5 +26,5 @@ for i in range(M):
     phase[i] = float(data_phase[i])
 
 plot(frequency, phase)
-set_xscale("log")
+xscale("log")
 show()
