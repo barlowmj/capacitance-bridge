@@ -27,7 +27,7 @@ def main():
     func_gen = rm.open_resource(func_gen_loc)
     lock_in = rm.open_resource(lock_in_loc)
 
-    # set decimal precision to 3
+    # set decimal precision
     getcontext().prec = 4
 
     # set frequency values to sweep through - need in notation "{m}E0{n}"
