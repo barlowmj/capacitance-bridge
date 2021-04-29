@@ -33,7 +33,7 @@ def main():
     # set frequency values to sweep through - need in notation "{m}E0{n}"
     print("Generating frequency values...")
     freq_vals = []
-    N = 9 # number of values per order of magnitude
+    N = 19 # number of values per order of magnitude
     a = 2
     b = 6
     for n in range(a,b):
@@ -144,7 +144,7 @@ def main():
 
     # set sensitivity
     print("Setting sensitivity...")
-    lock_in.write('SEN 24')
+    lock_in.write('SEN 22')
 
     # turn on output
     print("Turning on function generator output...")
@@ -155,19 +155,19 @@ def main():
     for i in range(M):
         # find phase difference so that signal is only in X component of lock-in
         print("Finding phase...")
-        phi_1 = Decimal(160)
-        sleep(3)
+        phi_1 = Decimal(90)
+        sleep(1)
         Y_1 = Decimal(lock_in.query_ascii_values('Y?')[0])
         print(f"Y1 = {Y_1}")
-        phi_2 = Decimal(200)
+        phi_2 = Decimal(270)
         func_gen.write(f'SOUR2:PHAS {phi_2}')
-        sleep(3)
+        sleep(1)
         Y_2 = Decimal(lock_in.query_ascii_values('Y?')[0])
         print(f"Y2 = {Y_2}")
         while (abs(phi_1 - phi_2) > Decimal(1e-1)):
             phi_m = (phi_1 + phi_2)/2
             func_gen.write(f'SOUR2:PHAS {phi_m}')
-            sleep(3)
+            sleep(1)
             Y_m = Decimal(lock_in.query_ascii_values('Y?')[0])
             print(f"Ym = {Y_m}")
             if (sign(Y_m) == sign(Y_2)):
@@ -188,7 +188,7 @@ def main():
         sleep(1)
         X_2 = Decimal(lock_in.query_ascii_values('X?')[0])
         print(f"X2 = {X_2}")
-        while (abs(a_1-a_2) > Decimal(1e-3)):
+        while (abs(a_1-a_2) > Decimal(1e-5)):
             a_m = (a_1 + a_2)/2
             func_gen.write(f'SOUR2:VOLT {a_m}')
             sleep(1)
@@ -219,7 +219,8 @@ def main():
         print("Resetting Source 2...")
         func_gen.write(f'SOUR2:VOLT {Vs}')
         func_gen.write('SOUR2:PHS 90')
-
+        func_gen.write('SOUR1:PHS 0')
+        func_gen.write('PHAS:SYNC')
     # turn off output
     print("Turning off output...")
     func_gen.write('OUTP1 0; OUTP2 0')
