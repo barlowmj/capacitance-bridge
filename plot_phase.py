@@ -24,7 +24,11 @@ for i in range(M):
     frequency[i] = float(data_freq[i])
     Vx[i] = float(data_Vx[i])
     phase[i] = float(data_phase[i])
-
+print(phase)
+figure(1)
 plot(frequency, phase)
+xscale("log")
+figure(2)
+plot(frequency,np.tan(phase*(np.pi/180)-np.pi))
 xscale("log")
 show()
