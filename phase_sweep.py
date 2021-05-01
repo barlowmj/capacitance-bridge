@@ -28,7 +28,7 @@ def main():
     # init source 1 - Vs
     print("Initializing Source 1...")
     func_gen.write('SOUR1:FUNC SIN')
-    func_gen.write('SOUR1:FREQ 1E2')
+    func_gen.write('SOUR1:FREQ 1E4')
     func_gen.write('SOUR1:VOLT 0.01')
     func_gen.write('SOUR1:VOLT:OFF 0')
     func_gen.write('SOUR1:PHAS 0')
@@ -36,7 +36,7 @@ def main():
     # init source 2 - Vx
     print("Initializing Source 2...")
     func_gen.write('SOUR2:FUNC SIN')
-    func_gen.write('SOUR2:FREQ 1E2')
+    func_gen.write('SOUR2:FREQ 1E4')
     func_gen.write('SOUR2:VOLT 0.01')
     func_gen.write('SOUR2:VOLT:OFF 0')
     func_gen.write('SOUR2:PHAS 0')

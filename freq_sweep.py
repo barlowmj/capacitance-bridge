@@ -33,7 +33,7 @@ def main():
     # set frequency values to sweep through - need in notation "{m}E0{n}"
     print("Generating frequency values...")
     freq_vals = []
-    N = 19 # number of values per order of magnitude
+    N = 18 # number of values per order of magnitude
     a = 2
     b = 6
     for n in range(a,b):
@@ -46,7 +46,7 @@ def main():
     M = N*(b-a)
     bal_Vx_vals = zeros(M)
     bal_phs_vals = zeros(M)
-    Vs = Decimal(0.01)
+    Vs = Decimal(0.0100)
 
     # generate time constant values for each frequency
     print("Generating time constant values...")

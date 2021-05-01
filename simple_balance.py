@@ -1,7 +1,7 @@
 from time import sleep, time
 import sys
 import pyvisa as pv
-from numpy import zeros, savetxt, linspace, sign, cos
+from numpy import zeros, savetxt, linspace, sign, cos, pi
 from decimal import *
 
 def main():
@@ -49,9 +49,8 @@ def main():
 
     # set initial time constant
     print("Initializing TC...")
-    lock_in.write('FASTMODE 1')
-    lock_in.write(f'TC {tc_n_vals[0]}')
-    tc = tc_vals[0]
+    lock_in.write('FASTMODE 0')
+    lock_in.write('TC 10')
 
     # set sensitivity
     print("Setting sensitivity...")
@@ -83,7 +82,6 @@ def main():
         else:
             phi_1 = phi_m
     print(f"Final phi: {phi_m}")
-    bal_phs_vals[i] = float(phi_m)
     
     # find amplitude to null lock-in reading
     print("Finding amplitude...")
@@ -107,11 +105,10 @@ def main():
         else:
             a_1 = a_m
     print(f"Final amp: {a_m}")
-    bal_Vx_vals[i] = float(a_m)
     
     Cs = Decimal(input("What is the value of Cs? "))
     
-    Cx = Vs*Cs/(cos(phi_m)*a_m)
+    Cx = Vs*Cs/(Decimal(abs(cos(float(phi_m)*pi/180)))*a_m)
     
     print(f"Cx = {Cx}")
     
